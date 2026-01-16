@@ -1,0 +1,2725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COPD Comprehensive Assessment System</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/manifest+json,{
+        \"name\":\"COPD Assessment System\",
+        \"short_name\":\"COPD Assess\",
+        \"start_url\":\".\",
+        \"display\":\"standalone\",
+        \"background_color\":\"#0f172a\",
+        \"theme_color\":\"#0ea5e9\",
+        \"icons\":[{
+            \"src\":\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Cpath d='M24 56 C24 32 38 24 46 30 V66 C46 74 38 82 28 82 C24 82 24 76 24 70 Z' stroke='%230ea5e9' stroke-width='4'/%3E%3Cpath d='M72 56 C72 32 58 24 50 30 V66 C50 74 58 82 68 82 C72 82 72 76 72 70 Z' stroke='%230ea5e9' stroke-width='4'/%3E%3Cline x1='48' y1='16' x2='48' y2='66' stroke='%230ea5e9' stroke-width='4'/%3E%3Crect x='42' y='22' width='12' height='26' rx='2' fill='%230ea5e9'/%3E%3Crect x='40' y='16' width='16' height='6' rx='2' fill='%230ea5e9'/%3E%3Cpath d='M40 34 Q48 42 56 34' stroke='%230ea5e9' stroke-width='3'/%3E%3Cpath d='M48 46 C42 44 38 40 36 36' stroke='%230ea5e9' stroke-width='3'/%3E%3Cpath d='M48 46 C54 44 58 40 60 36' stroke='%230ea5e9' stroke-width='3'/%3E%3C/svg%3E\",
+            \"sizes\":\"192x192\",
+            \"type\":\"image/svg+xml\"
+        }]
+    }">
+    
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    
+    <style>
+        /* ===== CSS VARIABLES ===== */
+        :root {
+            /* Primary Colors */
+            --primary-blue: #0ea5e9;
+            --primary-blue-dark: #0284c7;
+            --primary-blue-light: #7dd3fc;
+            
+            /* Gradient Colors */
+            --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            --gradient-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --gradient-card: linear-gradient(145deg, #1e293b 0%, #334155 100%);
+            
+            /* Clinical Status Colors */
+            --clinical-excellent: #10b981;
+            --clinical-good: #22c55e;
+            --clinical-moderate: #f59e0b;
+            --clinical-poor: #ef4444;
+            --clinical-severe: #dc2626;
+            --clinical-critical: #991b1b;
+            
+            /* UI Colors */
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.8);
+            --bg-card-hover: rgba(51, 65, 85, 0.8);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            /* Borders & Shadows */
+            --border-radius: 20px;
+            --border-radius-sm: 12px;
+            --border-radius-xs: 8px;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+            --shadow-glow: 0 0 30px rgba(14, 165, 233, 0.3);
+            
+            /* Spacing */
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 1.5rem;
+            --space-lg: 2rem;
+            --space-xl: 3rem;
+            --space-2xl: 4rem;
+            
+            /* Transitions */
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Segoe UI Emoji', 'Segoe UI Symbol', system-ui, sans-serif;
+            background: var(--gradient-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: var(--space-sm);
+            overflow-x: hidden;
+        }
+        
+        /* ===== TYPOGRAPHY ===== */
+        h1, h2, h3, h4 {
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: var(--space-md);
+            letter-spacing: -0.025em;
+        }
+        
+        h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 30px rgba(14, 165, 233, 0.2);
+        }
+        
+        h2 {
+            font-size: clamp(1.5rem, 4vw, 2.25rem);
+            color: var(--text-primary);
+        }
+        
+        h3 {
+            font-size: clamp(1.25rem, 3vw, 1.75rem);
+            color: var(--text-primary);
+        }
+        
+        .subtitle {
+            font-size: clamp(0.875rem, 2vw, 1.125rem);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-xl);
+            max-width: 800px;
+            line-height: 1.8;
+        }
+        
+        /* ===== ICON STYLING ===== */
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            margin-right: var(--space-md);
+            flex-shrink: 0;
+        }
+        
+        .logo-icon svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 4px 6px rgba(14, 165, 233, 0.3));
+        }
+        
+        .card-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--gradient-primary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-md);
+            margin-right: var(--space-md);
+            flex-shrink: 0;
+        }
+        
+        /* ===== LAYOUT CONTAINERS ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-sm);
+        }
+        
+        .main-header {
+            text-align: center;
+            margin-bottom: var(--space-2xl);
+            padding: var(--space-xl);
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+            flex-wrap: wrap;
+        }
+        
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--gradient-card);
+            border-radius: var(--border-radius);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-xl), var(--shadow-glow);
+            border-color: rgba(14, 165, 233, 0.4);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+        }
+        
+        .card-title {
+            flex: 1;
+        }
+        
+        /* ===== ASSESSMENT STEPS ===== */
+        .assessment-step {
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+            transition: all var(--transition-slow);
+            position: absolute;
+            width: 100%;
+            visibility: hidden;
+        }
+        
+        .assessment-step.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            position: relative;
+            visibility: visible;
+        }
+        
+        /* ===== PROGRESS BAR ===== */
+        .progress-container {
+            margin: var(--space-xl) 0;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: var(--border-radius);
+            padding: var(--space-lg);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .progress-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .progress-time {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin: var(--space-lg) 0;
+        }
+        
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(148, 163, 184, 0.2);
+            z-index: 1;
+            border-radius: 2px;
+        }
+        
+        .progress-step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .step-circle {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-card);
+            border: 3px solid rgba(148, 163, 184, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-sm);
+            transition: all var(--transition-normal);
+            font-weight: 600;
+            font-size: 1.125rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .step-circle.active {
+            background: var(--gradient-primary);
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 6px rgba(14, 165, 233, 0.2), var(--shadow-md);
+            animation: pulse 2s infinite;
+        }
+        
+        .step-circle.completed {
+            background: var(--clinical-excellent);
+            border-color: var(--clinical-excellent);
+        }
+        
+        .step-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all var(--transition-normal);
+        }
+        
+        .step-label.active {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        /* ===== QUESTION GROUPS ===== */
+        .question-group {
+            margin-bottom: var(--space-xl);
+        }
+        
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: var(--space-lg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        /* ===== RADIO BUTTONS ===== */
+        .radio-group {
+            display: grid;
+            gap: var(--space-sm);
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: var(--space-lg);
+            background: rgba(30, 41, 59, 0.5);
+            border: 2px solid rgba(148, 163, 184, 0.1);
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .radio-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+        
+        .radio-option:hover {
+            transform: translateX(8px);
+            border-color: var(--primary-blue);
+            background: rgba(30, 41, 59, 0.8);
+        }
+        
+        .radio-option.selected {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 1px var(--primary-blue), var(--shadow-inner);
+        }
+        
+        .radio-option.selected::before {
+            opacity: 0.1;
+        }
+        
+        .radio-input {
+            margin-right: var(--space-md);
+            accent-color: var(--primary-blue);
+            transform: scale(1.3);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .radio-label {
+            flex: 1;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .radio-title {
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+            color: var(--text-primary);
+            font-size: 1.125rem;
+        }
+        
+        .radio-description {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+        }
+        
+        /* ===== SLIDERS ===== */
+        .slider-container {
+            margin: var(--space-xl) 0;
+            position: relative;
+        }
+        
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .slider-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .slider-value {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.125rem;
+            background: rgba(30, 41, 59, 0.8);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--border-radius-xs);
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .range-slider {
+            width: 100%;
+            height: 12px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(90deg, 
+                var(--clinical-excellent) 0%, 
+                var(--clinical-good) 25%,
+                var(--clinical-moderate) 50%, 
+                var(--clinical-poor) 75%,
+                var(--clinical-severe) 100%);
+            border-radius: 6px;
+            outline: none;
+            box-shadow: var(--shadow-inner);
+        }
+        
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 32px;
+            height: 32px;
+            background: white;
+            border: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: all var(--transition-fast);
+        }
+        
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(14, 165, 233, 0.2);
+        }
+        
+        .range-slider::-moz-range-thumb {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .slider-ticks {
+            display: flex;
+            justify-content: space-between;
+            margin-top: var(--space-md);
+            padding: 0 16px;
+        }
+        
+        .tick {
+            width: 2px;
+            height: 8px;
+            background: var(--text-muted);
+        }
+        
+        .tick-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-top: var(--space-xs);
+            text-align: center;
+            min-width: 40px;
+        }
+        
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: var(--space-md) var(--space-xl);
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.025em;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+        
+        .btn-secondary {
+            background: rgba(30, 41, 59, 0.8);
+            color: var(--text-primary);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(30, 41, 59, 1);
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: var(--space-md);
+            margin-top: var(--space-xl);
+            flex-wrap: wrap;
+        }
+        
+        /* ===== RESULTS DISPLAY ===== */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-lg);
+            margin: var(--space-xl) 0;
+        }
+        
+        .result-card {
+            background: var(--gradient-card);
+            border-radius: var(--border-radius);
+            padding: var(--space-xl);
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all var(--transition-normal);
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+        
+        .result-card.good::before { background: var(--clinical-good); }
+        .result-card.moderate::before { background: var(--clinical-moderate); }
+        .result-card.poor::before { background: var(--clinical-poor); }
+        .result-card.severe::before { background: var(--clinical-severe); }
+        .result-card.critical::before { background: var(--clinical-critical); }
+        
+        .result-label {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-sm);
+            font-weight: 600;
+        }
+        
+        .result-value {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: var(--space-md) 0;
+            line-height: 1;
+        }
+        
+        .result-interpretation {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        /* ===== CLINICAL INSIGHTS ===== */
+        .insights-container {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(30, 41, 59, 0.9) 100%);
+            border-radius: var(--border-radius);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            border-left: 6px solid var(--primary-blue);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .insight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            padding: var(--space-md);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius-sm);
+            transition: all var(--transition-normal);
+        }
+        
+        .insight-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(8px);
+        }
+        
+        .insight-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.25rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .insight-content h4 {
+            margin-bottom: var(--space-xs);
+            color: var(--text-primary);
+        }
+        
+        .insight-content p {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+        }
+        
+        /* ===== QR CODE SECTION ===== */
+        .qr-section {
+            background: var(--gradient-card);
+            border-radius: var(--border-radius);
+            padding: var(--space-xl);
+            text-align: center;
+            margin: var(--space-xl) 0;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .qr-display-container {
+            margin: var(--space-lg) 0;
+        }
+        
+        #qrcode-canvas {
+            display: inline-block;
+            padding: 20px;
+            background: white;
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: var(--space-md);
+        }
+        
+        .qr-actions {
+            display: flex;
+            gap: var(--space-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: var(--space-lg) 0;
+        }
+        
+        .qr-instructions {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: var(--space-md);
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+        
+        /* ===== QUICK NAVIGATION ===== */
+        #quick-nav {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-normal);
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        /* ===== OFFLINE BANNER ===== */
+        #offline-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, var(--clinical-severe), var(--clinical-critical));
+            color: white;
+            text-align: center;
+            padding: 12px;
+            display: none;
+            z-index: 9999;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* ===== DATA DISPLAY ===== */
+        #data-display {
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: var(--border-radius-sm);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 0.875rem;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        #data-display.hidden {
+            display: none;
+        }
+        
+        /* ===== ANIMATIONS ===== */
+        @keyframes pulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 6px rgba(14, 165, 233, 0.2), var(--shadow-md);
+            }
+            50% { 
+                box-shadow: 0 0 0 12px rgba(14, 165, 233, 0.1), var(--shadow-md);
+            }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        /* ===== UTILITY CLASSES ===== */
+        .hidden {
+            display: none !important;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-gradient {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .mt-4 { margin-top: var(--space-xl); }
+        .mb-4 { margin-bottom: var(--space-xl); }
+        .p-4 { padding: var(--space-xl); }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-xs);
+            }
+            
+            .card {
+                padding: var(--space-lg);
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-md);
+            }
+            
+            .progress-step {
+                flex: none;
+                width: 25%;
+            }
+            
+            .step-circle {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .step-label {
+                font-size: 0.75rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-icon {
+                margin-right: 0;
+                margin-bottom: var(--space-md);
+            }
+            
+            .qr-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .qr-actions .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            #quick-nav {
+                bottom: 20px;
+                right: 20px;
+            }
+            
+            .nav-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            :root {
+                --space-xs: 0.25rem;
+                --space-sm: 0.75rem;
+                --space-md: 1rem;
+                --space-lg: 1.5rem;
+                --space-xl: 2rem;
+            }
+            
+            .result-value {
+                font-size: 2.5rem;
+            }
+            
+            .radio-option {
+                padding: var(--space-md);
+            }
+            
+            .slider-value {
+                min-width: 50px;
+                padding: 4px 8px;
+                font-size: 1rem;
+            }
+        }
+        
+        /* ===== PRINT STYLES ===== */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+            }
+            
+            .container {
+                max-width: 100% !important;
+                padding: 20px !important;
+            }
+            
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                background: white !important;
+                color: black !important;
+                margin: 10px 0 !important;
+                break-inside: avoid;
+            }
+            
+            .btn, .progress-container, .qr-section, #quick-nav, #offline-banner {
+                display: none !important;
+            }
+            
+            .text-gradient {
+                background: none !important;
+                -webkit-text-fill-color: black !important;
+                color: black !important;
+            }
+            
+            .result-card {
+                break-inside: avoid;
+                border: 1px solid #ccc !important;
+                background: white !important;
+            }
+            
+            .insights-container {
+                border: 1px solid #ccc !important;
+                background: #f9f9f9 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Offline Banner -->
+    <div id="offline-banner">
+        <i class="fas fa-wifi-slash"></i> Working offline - Results will not be saved to server
+    </div>
+
+    <div class="container">
+        <!-- Main Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <div class="logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+                        <path d="M24 56 C24 32 38 24 46 30 V66 C46 74 38 82 28 82 C24 82 24 76 24 70 Z" stroke="currentColor" stroke-width="4"/>
+                        <path d="M72 56 C72 32 58 24 50 30 V66 C50 74 58 82 68 82 C72 82 72 76 72 70 Z" stroke="currentColor" stroke-width="4"/>
+                        <line x1="48" y1="16" x2="48" y2="66" stroke="currentColor" stroke-width="4"/>
+                        <rect x="42" y="22" width="12" height="26" rx="2" fill="currentColor"/>
+                        <rect x="40" y="16" width="16" height="6" rx="2" fill="currentColor"/>
+                        <path d="M40 34 Q48 42 56 34" stroke="currentColor" stroke-width="3"/>
+                        <path d="M48 46 C42 44 38 40 36 36" stroke="currentColor" stroke-width="3"/>
+                        <path d="M48 46 C54 44 58 40 60 36" stroke="currentColor" stroke-width="3"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1>COPD Comprehensive Assessment</h1>
+                    <p class="subtitle">
+                        Professional clinical assessment system combining mMRC Dyspnea Scale, CAT Questionnaire, 
+                        and GesEPOC Clinical Control evaluation. Complete all three tools for integrated clinical insights.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Progress Tracker -->
+            <div class="progress-container">
+                <div class="progress-header">
+                    <span class="progress-text">Assessment Progress</span>
+                    <div class="progress-time">
+                        <i class="far fa-clock"></i>
+                        <span id="timer">00:00</span>
+                    </div>
+                </div>
+                <div class="progress-steps">
+                    <div class="progress-step">
+                        <div class="step-circle active" id="step-1">1</div>
+                        <div class="step-label active">mMRC Scale</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-circle" id="step-2">2</div>
+                        <div class="step-label">CAT Test</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-circle" id="step-3">3</div>
+                        <div class="step-label">Clinical Control</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-circle" id="step-4">4</div>
+                        <div class="step-label">Results</div>
+                    </div>
+                </div>
+                <div class="progress-text" id="progress-text">Step 1 of 4: mMRC Dyspnea Scale</div>
+            </div>
+        </header>
+
+        <!-- Assessment Steps Container -->
+        <div id="assessment-container">
+            <!-- Step 1: mMRC Assessment -->
+            <div class="assessment-step active" id="step-mMRC" role="region" aria-labelledby="mmrc-title">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-wind"></i>
+                        </div>
+                        <div class="card-title">
+                            <h2 id="mmrc-title">mMRC Dyspnea Scale</h2>
+                            <p class="text-secondary">Grade breathlessness during daily activities</p>
+                        </div>
+                    </div>
+                    
+                    <div class="question-group">
+                        <p class="question-text">Select the statement that best describes your shortness of breath:</p>
+                        <div class="radio-group" id="mmrc-options" role="radiogroup" aria-label="mMRC Dyspnea Scale options">
+                            <!-- Options populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="btn-next-mMRC" accesskey="n" aria-label="Next step: CAT Assessment">
+                            Next: CAT Assessment <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: CAT Assessment -->
+            <div class="assessment-step hidden" id="step-CAT" role="region" aria-labelledby="cat-title">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div class="card-title">
+                            <h2 id="cat-title">COPD Assessment Test (CAT)</h2>
+                            <p class="text-secondary">8 questions to evaluate COPD symptoms and impact</p>
+                        </div>
+                    </div>
+                    
+                    <div id="cat-questions-container">
+                        <!-- CAT questions populated by JavaScript -->
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" id="btn-prev-CAT" accesskey="b" aria-label="Back to previous step">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button class="btn btn-primary" id="btn-next-CAT" accesskey="n" aria-label="Next step: Clinical Assessment">
+                            Next: Clinical Assessment <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: GesEPOC Clinical Assessment -->
+            <div class="assessment-step hidden" id="step-GesEPOC" role="region" aria-labelledby="gesepoc-title">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-stethoscope"></i>
+                        </div>
+                        <div class="card-title">
+                            <h2 id="gesepoc-title">GesEPOC Clinical Control</h2>
+                            <p class="text-secondary">Clinical evaluation for treatment decision support</p>
+                        </div>
+                    </div>
+                    
+                    <div id="gesepoc-questions-container">
+                        <!-- GesEPOC questions populated by JavaScript -->
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" id="btn-prev-GesEPOC" accesskey="b" aria-label="Back to previous step">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button class="btn btn-primary" id="btn-next-GesEPOC" accesskey="v" aria-label="View complete results">
+                            View Complete Results <i class="fas fa-chart-bar"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Results Dashboard -->
+            <div class="assessment-step hidden" id="step-Results" role="region" aria-labelledby="results-title">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="card-title">
+                            <h2 id="results-title">Comprehensive Assessment Results</h2>
+                            <p class="text-secondary">Integrated analysis based on all three assessment tools</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Summary -->
+                    <div class="results-grid">
+                        <div class="result-card" id="result-mMRC">
+                            <div class="result-label">mMRC Dyspnea Scale</div>
+                            <div class="result-value" id="mmrc-value">-</div>
+                            <div class="result-interpretation" id="mmrc-interpretation">Not assessed</div>
+                        </div>
+                        
+                        <div class="result-card" id="result-CAT">
+                            <div class="result-label">CAT Score</div>
+                            <div class="result-value" id="cat-value">-</div>
+                            <div class="result-interpretation" id="cat-interpretation">Not assessed</div>
+                        </div>
+                        
+                        <div class="result-card" id="result-GesEPOC">
+                            <div class="result-label">GesEPOC Control</div>
+                            <div class="result-value" id="gesepoc-value">-</div>
+                            <div class="result-interpretation" id="gesepoc-interpretation">Not assessed</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Clinical Insights -->
+                    <div class="insights-container">
+                        <h3><i class="fas fa-lightbulb"></i> Clinical Insights & Recommendations</h3>
+                        <div id="clinical-insights">
+                            <!-- Insights populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <!-- Data Display -->
+                    <div class="data-container mt-4">
+                        <div class="card">
+                            <h3><i class="fas fa-database"></i> Assessment Data</h3>
+                            <div id="data-display" class="hidden">
+                                <!-- Data content populated by JavaScript -->
+                            </div>
+                            <button class="btn btn-secondary" id="btn-toggle-data">
+                                <i class="fas fa-eye"></i> View Raw Data
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- QR Code Section -->
+                    <div class="qr-section">
+                        <h3><i class="fas fa-qrcode"></i> Share Assessment Results</h3>
+                        <p class="text-secondary">Scan or save this QR code to share assessment results</p>
+                        
+                        <div class="qr-display-container">
+                            <div id="qrcode-canvas"></div>
+                            <div id="qrcode-fallback" class="hidden"></div>
+                        </div>
+                        
+                        <div class="qr-actions">
+                            <button class="btn btn-secondary" id="btn-download-screenshot">
+                                <i class="fas fa-camera"></i> Screenshot Results
+                            </button>
+                            <button class="btn btn-secondary" id="btn-copy-summary">
+                                <i class="fas fa-copy"></i> Copy Summary
+                            </button>
+                            <button class="btn btn-secondary" id="btn-generate-pdf">
+                                <i class="fas fa-file-pdf"></i> Generate PDF
+                            </button>
+                        </div>
+                        
+                        <p class="qr-instructions">
+                            <i class="fas fa-info-circle"></i> This QR code contains an encrypted summary of your assessment results. 
+                            Medical professionals can scan this to access your clinical data. No patient data is stored.
+                        </p>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" id="btn-restart" accesskey="r" aria-label="Start new assessment">
+                            <i class="fas fa-redo"></i> New Assessment
+                        </button>
+                        <button class="btn btn-secondary" id="btn-print" accesskey="p" aria-label="Print results">
+                            <i class="fas fa-print"></i> Print Results
+                        </button>
+                        <button class="btn btn-primary" id="btn-email" accesskey="e" aria-label="Email results">
+                            <i class="fas fa-envelope"></i> Email Results
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Navigation -->
+    <div id="quick-nav">
+        <button class="nav-btn btn-secondary" id="nav-prev" aria-label="Previous step">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <button class="nav-btn btn-secondary" id="nav-next" aria-label="Next step">
+            <i class="fas fa-arrow-right"></i>
+        </button>
+        <button class="nav-btn btn-primary" id="nav-results" aria-label="Go to results">
+            <i class="fas fa-chart-bar"></i>
+        </button>
+    </div>
+
+    <script>
+        // ============================================
+        // COMPREHENSIVE COPD ASSESSMENT SYSTEM
+        // ============================================
+
+        // Clinical Database Structure
+        const ClinicalDatabase = {
+            // mMRC Scale Configuration
+            mMRC: {
+                options: [
+                    {
+                        value: 0,
+                        title: "Grade 0",
+                        description: "Not troubled by breathlessness except with strenuous exercise",
+                        interpretation: "No significant dyspnea",
+                        icon: "fa-running"
+                    },
+                    {
+                        value: 1,
+                        title: "Grade 1",
+                        description: "Troubled by shortness of breath when hurrying or walking up a slight hill",
+                        interpretation: "Mild dyspnea",
+                        icon: "fa-walking"
+                    },
+                    {
+                        value: 2,
+                        title: "Grade 2",
+                        description: "Walks slower than people of the same age due to breathlessness, or has to stop for breath when walking at own pace",
+                        interpretation: "Moderate dyspnea",
+                        icon: "fa-user-slash"
+                    },
+                    {
+                        value: 3,
+                        title: "Grade 3",
+                        description: "Stops for breath after walking about 100 meters or after a few minutes",
+                        interpretation: "Severe dyspnea",
+                        icon: "fa-ban"
+                    },
+                    {
+                        value: 4,
+                        title: "Grade 4",
+                        description: "Too breathless to leave the house or breathless when dressing/undressing",
+                        interpretation: "Very severe dyspnea",
+                        icon: "fa-home"
+                    }
+                ],
+                getInterpretation: (grade) => {
+                    const interpretations = [
+                        { min: 0, max: 0, level: "None", color: "good", icon: "fa-check-circle" },
+                        { min: 1, max: 1, level: "Mild", color: "good", icon: "fa-check-circle" },
+                        { min: 2, max: 2, level: "Moderate", color: "moderate", icon: "fa-exclamation-circle" },
+                        { min: 3, max: 3, level: "Severe", color: "poor", icon: "fa-exclamation-triangle" },
+                        { min: 4, max: 4, level: "Very Severe", color: "severe", icon: "fa-skull-crossbones" }
+                    ];
+                    return interpretations.find(i => grade >= i.min && grade <= i.max);
+                }
+            },
+
+            // CAT Questionnaire Configuration
+            CAT: {
+                questions: [
+                    {
+                        id: 1,
+                        text: "I never cough",
+                        opposite: "I cough all the time",
+                        icon: "fa-lungs-virus",
+                        items: [
+                            { text: "Never", value: 0, color: "var(--clinical-excellent)" },
+                            { text: "Rarely", value: 1, color: "var(--clinical-good)" },
+                            { text: "Sometimes", value: 2, color: "var(--clinical-moderate)" },
+                            { text: "Often", value: 3, color: "var(--clinical-poor)" },
+                            { text: "Always", value: 4, color: "var(--clinical-severe)" }
+                        ]
+                    },
+                    {
+                        id: 2,
+                        text: "I have no phlegm (mucus) in my chest at all",
+                        opposite: "My chest is full of phlegm",
+                        icon: "fa-tint",
+                        items: [
+                            { text: "None", value: 0, color: "var(--clinical-excellent)" },
+                            { text: "Small amount", value: 1, color: "var(--clinical-good)" },
+                            { text: "Moderate", value: 2, color: "var(--clinical-moderate)" },
+                            { text: "Large amount", value: 3, color: "var(--clinical-poor)" },
+                            { text: "Very large", value: 4, color: "var(--clinical-severe)" }
+                        ]
+                    },
+                    {
+                        id: 3,
+                        text: "My chest does not feel tight at all",
+                        opposite: "My chest feels very tight",
+                        icon: "fa-compress-arrows-alt",
+                        items: [
+                            { text: "Not tight", value: 0, color: "var(--clinical-excellent)" },
+                            { text: "Slightly tight", value: 1, color: "var(--clinical-good)" },
+                            { text: "Moderately tight", value: 2, color: "var(--clinical-moderate)" },
+                            { text: "Very tight", value: 3, color: "var(--clinical-poor)" },
+                            { text: "Extremely tight", value: 4, color: "var(--clinical-severe)" }
+                        ]
+                    },
+                    {
+                        id: 4,
+                        text: "When I walk up a hill or one flight of stairs I am not breathless",
+                        opposite: "When I walk up a hill or one flight of stairs I am very breathless",
+                        icon: "fa-mountain",
+                        items: [
+                            { text: "Not breathless", value: 0, color: "var(--clinical-excellent)" },
+                            { text: "Slightly breathless", value: 1, color: "var(--clinical-good)" },
+                            { text: "Moderately breathless", value: 2, color: "var(--clinical-moderate)" },
+                            { text: "Very breathless", value: 3, color: "var(--clinical-poor)" },
+                            { text: "Extremely breathless", value: 4, color: "var(--clinical-severe)" }
+                        ]
+                    },
+                    {
+                        id: 5,
+                        text: "I am not limited doing any activities at home",
+                        opposite: "I am very limited doing activities at home",
+                        icon: "fa-home",
+                        items: [
+                            { text: "Not limited", value: 0, color: "var(--clinical-excellent)" },
+                            { text: "Slightly limited", value: 1, color: "var(--clinical-good)" },
+                            { text: "Moderately limited", value: 2, color: "var(--clinical-moderate)" },
+                            { text: "Very limited", value: 3, color: "var(--clinical-poor)" },
+                            { text: "Extremely limited", value: 4, color: "var(--clinical-severe)" }
+                        ]
+                    },
+                    {
+                        id: 6,
+                        text: "I am confident leaving my home despite my lung condition",
+                        opposite: "I am not at all confident leaving my home because of my lung condition",
+                        icon: "fa-door-open",
+                        items: [
+                            { text: "Very confident", value: 0, color: "var(--clinical-excellent)" },
+                            { text: "Confident", value: 1, color: "var(--clinical-good)" },
+                            { text: "Neutral", value: 2, color: "var(--clinical-moderate)" },
+                            { text: "Not confident", value: 3, color: "var(--clinical-poor)" },
+                            { text: "Not at all confident", value: 4, color: "var(--clinical-severe)" }
+                        ]
+                    },
+                    {
+                        id: 7,
+                        text: "I sleep soundly",
+                        opposite: "I don't sleep soundly because of my lung condition",
+                        icon: "fa-bed",
+                        items: [
+                            { text: "Soundly", value: 0, color: "var(--clinical-excellent)" },
+                            { text: "Mostly soundly", value: 1, color: "var(--clinical-good)" },
+                            { text: "Somewhat", value: 2, color: "var(--clinical-moderate)" },
+                            { text: "Poorly", value: 3, color: "var(--clinical-poor)" },
+                            { text: "Very poorly", value: 4, color: "var(--clinical-severe)" }
+                        ]
+                    },
+                    {
+                        id: 8,
+                        text: "I have lots of energy",
+                        opposite: "I have no energy at all",
+                        icon: "fa-bolt",
+                        items: [
+                            { text: "Lots of energy", value: 0, color: "var(--clinical-excellent)" },
+                            { text: "Moderate energy", value: 1, color: "var(--clinical-good)" },
+                            { text: "Some energy", value: 2, color: "var(--clinical-moderate)" },
+                            { text: "Little energy", value: 3, color: "var(--clinical-poor)" },
+                            { text: "No energy", value: 4, color: "var(--clinical-severe)" }
+                        ]
+                    }
+                ],
+                getInterpretation: (score) => {
+                    if (score <= 10) return { level: "Low Impact", color: "good", description: "Minimal symptom impact", icon: "fa-smile" };
+                    if (score <= 20) return { level: "Medium Impact", color: "moderate", description: "Moderate symptom impact", icon: "fa-meh" };
+                    if (score <= 30) return { level: "High Impact", color: "poor", description: "Significant symptom impact", icon: "fa-frown" };
+                    return { level: "Very High Impact", color: "severe", description: "Severe symptom impact", icon: "fa-dizzy" };
+                },
+                calculateScore: (answers) => {
+                    return Object.values(answers).reduce((sum, val) => sum + (val || 0), 0);
+                }
+            },
+
+            // GesEPOC Clinical Control Configuration
+            GesEPOC: {
+                questions: [
+                    {
+                        id: "stability",
+                        title: "Clinical Stability",
+                        question: "How have you been since your last visit?",
+                        icon: "fa-heartbeat",
+                        type: "radio",
+                        options: [
+                            { value: "better", label: "Better", clinicalValue: "favorable", icon: "fa-thumbs-up" },
+                            { value: "same", label: "Similar/Stable", clinicalValue: "favorable", icon: "fa-balance-scale" },
+                            { value: "worse", label: "Worse", clinicalValue: "unfavorable", icon: "fa-thumbs-down" }
+                        ]
+                    },
+                    {
+                        id: "exacerbations",
+                        title: "Exacerbations",
+                        question: "Have you had any COPD exacerbations in the last 3 months?",
+                        icon: "fa-virus",
+                        type: "radio",
+                        options: [
+                            { value: "no", label: "No exacerbations", clinicalValue: "favorable", icon: "fa-check-circle" },
+                            { value: "yes", label: "Yes, one or more", clinicalValue: "unfavorable", icon: "fa-exclamation-circle" }
+                        ]
+                    },
+                    {
+                        id: "sputum",
+                        title: "Sputum Characteristics",
+                        question: "What is the color of your sputum?",
+                        icon: "fa-tint",
+                        type: "radio",
+                        options: [
+                            { value: "clear", label: "Clear/No sputum", clinicalValue: "favorable", icon: "fa-check" },
+                            { value: "colored", label: "Colored/Yellow/Green", clinicalValue: "unfavorable", icon: "fa-exclamation" }
+                        ]
+                    },
+                    {
+                        id: "rescue",
+                        title: "Rescue Medication",
+                        question: "How often do you use rescue medication?",
+                        icon: "fa-syringe",
+                        type: "radio",
+                        options: [
+                            { value: "low", label: "< 3 times per week", clinicalValue: "favorable", icon: "fa-battery-quarter" },
+                            { value: "high", label: "≥ 3 times per week", clinicalValue: "unfavorable", icon: "fa-battery-full" }
+                        ]
+                    },
+                    {
+                        id: "activity",
+                        title: "Physical Activity",
+                        question: "Daily physical activity level:",
+                        icon: "fa-running",
+                        type: "radio",
+                        options: [
+                            { value: "adequate", label: "≥ 30 minutes per day", clinicalValue: "favorable", icon: "fa-check-double" },
+                            { value: "low", label: "< 30 minutes per day", clinicalValue: "unfavorable", icon: "fa-times-circle" }
+                        ]
+                    },
+                    {
+                        id: "fev1",
+                        title: "Lung Function",
+                        question: "FEV₁ (% predicted):",
+                        icon: "fa-wind",
+                        type: "radio",
+                        options: [
+                            { value: ">=50", label: "≥ 50%", clinicalValue: "favorable", icon: "fa-arrow-up" },
+                            { value: "<50", label: "< 50%", clinicalValue: "unfavorable", icon: "fa-arrow-down" },
+                            { value: "unknown", label: "Unknown", clinicalValue: "neutral", icon: "fa-question" }
+                        ]
+                    }
+                ],
+                calculateControl: (answers, mmrcGrade, catScore) => {
+                    let unfavorableCount = 0;
+                    
+                    // Count unfavorable criteria
+                    ClinicalDatabase.GesEPOC.questions.forEach(q => {
+                        const answer = answers[q.id];
+                        if (answer) {
+                            const option = q.options.find(opt => opt.value === answer);
+                            if (option?.clinicalValue === "unfavorable") unfavorableCount++;
+                        }
+                    });
+
+                    // Add mMRC as unfavorable if ≥ 2
+                    if (mmrcGrade >= 2) unfavorableCount++;
+
+                    // Add CAT as unfavorable if ≥ 20
+                    if (catScore >= 20) unfavorableCount++;
+
+                    // Clinical stability check
+                    const isStable = answers.stability !== "worse" && answers.exacerbations === "no";
+
+                    // Determine control status
+                    if (isStable && unfavorableCount <= 2) {
+                        return {
+                            status: "Controlled",
+                            color: "good",
+                            description: "Well-controlled COPD",
+                            classification: "A",
+                            icon: "fa-check-circle"
+                        };
+                    } else if (!isStable && unfavorableCount <= 2) {
+                        return {
+                            status: "Partially Controlled",
+                            color: "moderate",
+                            description: "Unstable with low impact",
+                            classification: "B",
+                            icon: "fa-exclamation-circle"
+                        };
+                    } else if (isStable && unfavorableCount >= 3) {
+                        return {
+                            status: "Poorly Controlled",
+                            color: "poor",
+                            description: "Stable with high impact",
+                            classification: "C",
+                            icon: "fa-exclamation-triangle"
+                        };
+                    } else {
+                        return {
+                            status: "Uncontrolled",
+                            color: "severe",
+                            description: "Unstable with high impact",
+                            classification: "D",
+                            icon: "fa-skull-crossbones"
+                        };
+                    }
+                }
+            },
+
+            // Clinical Recommendations Database
+            Recommendations: {
+                getByScores: (mmrc, cat, gesepoc) => {
+                    const recommendations = [];
+                    
+                    // mMRC-based recommendations
+                    if (mmrc >= 3) {
+                        recommendations.push({
+                            icon: "fa-wind",
+                            title: "Severe Dyspnea Management",
+                            content: "Consider evaluation for pulmonary rehabilitation and assess need for supplemental oxygen therapy. Monitor for signs of respiratory failure."
+                        });
+                    } else if (mmrc >= 2) {
+                        recommendations.push({
+                            icon: "fa-lungs",
+                            title: "Moderate Dyspnea",
+                            content: "Breathing techniques and pacing activities may help manage symptoms. Consider referral to respiratory physiotherapy."
+                        });
+                    }
+                    
+                    // CAT-based recommendations
+                    if (cat >= 25) {
+                        recommendations.push({
+                            icon: "fa-heartbeat",
+                            title: "High Symptom Burden",
+                            content: "Significant symptom burden detected. Review current medication regimen and consider optimization of maintenance therapy."
+                        });
+                    } else if (cat >= 15) {
+                        recommendations.push({
+                            icon: "fa-clipboard-check",
+                            title: "Moderate Symptoms",
+                            content: "Regular symptom monitoring recommended. Ensure adequate inhaler technique education and adherence support."
+                        });
+                    }
+                    
+                    // GesEPOC-based recommendations
+                    if (gesepoc.classification === "D") {
+                        recommendations.push({
+                            icon: "fa-exclamation-triangle",
+                            title: "Urgent Clinical Review",
+                            content: "Uncontrolled COPD with high impact. Requires immediate clinical evaluation and treatment optimization."
+                        });
+                    } else if (gesepoc.classification === "C") {
+                        recommendations.push({
+                            icon: "fa-stethoscope",
+                            title: "Treatment Review Needed",
+                            content: "Stable but high-impact COPD. Consider step-up in therapy and regular follow-up."
+                        });
+                    } else if (gesepoc.classification === "B") {
+                        recommendations.push({
+                            icon: "fa-calendar-check",
+                            title: "Close Monitoring",
+                            content: "Unstable with low impact. Schedule follow-up within 1-3 months and monitor for exacerbations."
+                        });
+                    }
+                    
+                    // General recommendations
+                    recommendations.push({
+                        icon: "fa-calendar-alt",
+                        title: "Regular Follow-up",
+                        content: "Schedule regular clinical reviews every 3-6 months for ongoing monitoring and treatment adjustment as needed."
+                    });
+                    
+                    return recommendations;
+                }
+            }
+        };
+
+        // ============================================
+        // ENHANCED APPLICATION
+        // ============================================
+        class EnhancedCOPDAssessment {
+            constructor() {
+                this.state = {
+                    currentStep: 1,
+                    mmrcGrade: null,
+                    catAnswers: {},
+                    gesepocAnswers: {},
+                    results: null,
+                    startTime: Date.now(),
+                    stepTimes: {},
+                    validationErrors: []
+                };
+                
+                this.initialize();
+            }
+            
+            initialize() {
+                this.renderMMRCStep();
+                this.renderCATStep();
+                this.renderGesEPOCStep();
+                this.setupEventListeners();
+                this.setupQuickNavigation();
+                this.setupOfflineDetection();
+                this.startTimer();
+                this.updateProgress();
+                this.updateButtonStates();
+            }
+            
+            // ===== TIMER FUNCTIONS =====
+            startTimer() {
+                this.updateTimer();
+                this.timerInterval = setInterval(() => this.updateTimer(), 1000);
+            }
+            
+            updateTimer() {
+                const elapsed = Math.floor((Date.now() - this.state.startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                const seconds = (elapsed % 60).toString().padStart(2, '0');
+                document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+            }
+            
+            // ===== STEP RENDERING =====
+            renderMMRCStep() {
+                const container = document.getElementById('mmrc-options');
+                container.innerHTML = '';
+                
+                ClinicalDatabase.mMRC.options.forEach(option => {
+                    const div = document.createElement('div');
+                    div.className = 'radio-option';
+                    div.dataset.value = option.value;
+                    div.setAttribute('role', 'radio');
+                    div.setAttribute('aria-checked', this.state.mmrcGrade === option.value ? 'true' : 'false');
+                    div.tabIndex = 0;
+                    
+                    if (this.state.mmrcGrade === option.value) {
+                        div.classList.add('selected');
+                    }
+                    
+                    div.innerHTML = `
+                        <div style="display: flex; align-items: center; width: 100%;">
+                            <input type="radio" name="mmrc" value="${option.value}" 
+                                   ${this.state.mmrcGrade === option.value ? 'checked' : ''}
+                                   class="radio-input">
+                            <div style="margin-right: var(--space-md);">
+                                <i class="fas ${option.icon}" style="font-size: 1.25rem; color: var(--primary-blue);"></i>
+                            </div>
+                            <div class="radio-label">
+                                <div class="radio-title">${option.title}</div>
+                                <div class="radio-description">${option.description}</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    div.addEventListener('click', () => this.selectMMRCOption(option.value));
+                    div.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.selectMMRCOption(option.value);
+                        }
+                    });
+                    
+                    container.appendChild(div);
+                });
+            }
+            
+            selectMMRCOption(value) {
+                this.state.mmrcGrade = value;
+                this.renderMMRCStep();
+                this.updateButtonStates();
+                this.recordStepTime(1);
+            }
+            
+            renderCATStep() {
+                const container = document.getElementById('cat-questions-container');
+                container.innerHTML = '';
+                
+                ClinicalDatabase.CAT.questions.forEach((question, index) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question-group';
+                    
+                    const currentValue = this.state.catAnswers[question.id] || 0;
+                    
+                    questionDiv.innerHTML = `
+                        <div class="card">
+                            <div style="display: flex; align-items: center; margin-bottom: var(--space-lg);">
+                                <div style="margin-right: var(--space-md);">
+                                    <i class="fas ${question.icon}" style="font-size: 1.5rem; color: var(--primary-blue);"></i>
+                                </div>
+                                <div>
+                                    <h3>Question ${index + 1}</h3>
+                                </div>
+                            </div>
+                            <p class="question-text">${question.text}</p>
+                            
+                            <div class="slider-container">
+                                <div class="slider-header">
+                                    <span class="slider-label">${question.text}</span>
+                                    <div class="slider-value" id="cat-value-${question.id}">${currentValue}</div>
+                                </div>
+                                
+                                <input type="range" min="0" max="4" value="${currentValue}" 
+                                       class="range-slider cat-slider" data-question="${question.id}"
+                                       step="1" aria-label="Select score for question ${index + 1}">
+                                
+                                <div class="slider-ticks">
+                                    ${question.items.map((item, i) => `
+                                        <div style="display: flex; flex-direction: column; align-items: center;">
+                                            <div class="tick" style="background: ${item.color};"></div>
+                                            <div class="tick-label">${i}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; margin-top: var(--space-sm);">
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">${question.text}</span>
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">${question.opposite}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(questionDiv);
+                    
+                    // Add slider event listener
+                    const slider = questionDiv.querySelector('.cat-slider');
+                    const valueDisplay = questionDiv.querySelector(`#cat-value-${question.id}`);
+                    
+                    slider.addEventListener('input', (e) => {
+                        const value = parseInt(e.target.value);
+                        valueDisplay.textContent = value;
+                        this.state.catAnswers[question.id] = value;
+                        
+                        // Update slider color
+                        this.updateSliderColor(slider, value);
+                        
+                        // Record step time
+                        this.recordStepTime(2);
+                        this.updateButtonStates();
+                    });
+                    
+                    // Initialize slider color
+                    this.updateSliderColor(slider, currentValue);
+                });
+            }
+            
+            updateSliderColor(slider, value) {
+                const percent = (value / 4) * 100;
+                const colors = ClinicalDatabase.CAT.questions.find(q => 
+                    q.id === parseInt(slider.dataset.question)
+                ).items[value].color;
+                
+                slider.style.background = `linear-gradient(90deg, ${colors} 0%, ${colors} ${percent}%, rgba(148, 163, 184, 0.2) ${percent}%)`;
+            }
+            
+            renderGesEPOCStep() {
+                const container = document.getElementById('gesepoc-questions-container');
+                container.innerHTML = '';
+                
+                ClinicalDatabase.GesEPOC.questions.forEach(question => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question-group';
+                    
+                    questionDiv.innerHTML = `
+                        <div class="card">
+                            <div style="display: flex; align-items: center; margin-bottom: var(--space-lg);">
+                                <div style="margin-right: var(--space-md);">
+                                    <i class="fas ${question.icon}" style="font-size: 1.5rem; color: var(--primary-blue);"></i>
+                                </div>
+                                <div>
+                                    <h3>${question.title}</h3>
+                                </div>
+                            </div>
+                            <p class="question-text">${question.question}</p>
+                            <div class="radio-group" id="gesepoc-${question.id}"></div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(questionDiv);
+                    
+                    const optionsContainer = document.getElementById(`gesepoc-${question.id}`);
+                    
+                    question.options.forEach(option => {
+                        const div = document.createElement('div');
+                        div.className = 'radio-option';
+                        div.dataset.value = option.value;
+                        div.setAttribute('role', 'radio');
+                        div.setAttribute('aria-checked', this.state.gesepocAnswers[question.id] === option.value ? 'true' : 'false');
+                        div.tabIndex = 0;
+                        
+                        if (this.state.gesepocAnswers[question.id] === option.value) {
+                            div.classList.add('selected');
+                        }
+                        
+                        div.innerHTML = `
+                            <div style="display: flex; align-items: center; width: 100%;">
+                                <input type="radio" name="gesepoc-${question.id}" value="${option.value}"
+                                       ${this.state.gesepocAnswers[question.id] === option.value ? 'checked' : ''}
+                                       class="radio-input">
+                                <div style="margin-right: var(--space-md);">
+                                    <i class="fas ${option.icon}" style="font-size: 1.25rem; color: ${
+                                        option.clinicalValue === 'favorable' ? 'var(--clinical-good)' :
+                                        option.clinicalValue === 'unfavorable' ? 'var(--clinical-poor)' :
+                                        'var(--text-secondary)'
+                                    };"></i>
+                                </div>
+                                <div class="radio-label">
+                                    <div class="radio-title">${option.label}</div>
+                                    <div class="radio-description" style="color: ${
+                                        option.clinicalValue === 'favorable' ? 'var(--clinical-good)' :
+                                        option.clinicalValue === 'unfavorable' ? 'var(--clinical-poor)' :
+                                        'var(--text-secondary)'
+                                    }">
+                                        <i class="fas ${
+                                            option.clinicalValue === 'favorable' ? 'fa-check' :
+                                            option.clinicalValue === 'unfavorable' ? 'fa-times' :
+                                            'fa-minus'
+                                        }"></i> ${option.clinicalValue === 'favorable' ? 'Favorable' :
+                                          option.clinicalValue === 'unfavorable' ? 'Unfavorable' :
+                                          'Neutral'}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        div.addEventListener('click', () => this.selectGesEPOCOption(question.id, option.value));
+                        div.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                this.selectGesEPOCOption(question.id, option.value);
+                            }
+                        });
+                        
+                        optionsContainer.appendChild(div);
+                    });
+                });
+            }
+            
+            selectGesEPOCOption(questionId, value) {
+                this.state.gesepocAnswers[questionId] = value;
+                this.renderGesEPOCStep();
+                this.recordStepTime(3);
+                this.updateButtonStates();
+            }
+            
+            // ===== STEP NAVIGATION =====
+            navigateToStep(stepNumber) {
+                // Validate current step before leaving
+                if (!this.validateStep(this.state.currentStep)) {
+                    return;
+                }
+                
+                // Hide all steps
+                document.querySelectorAll('.assessment-step').forEach(step => {
+                    step.classList.remove('active');
+                    step.style.visibility = 'hidden';
+                });
+                
+                // Show current step
+                const stepElement = document.getElementById(`step-${this.getStepName(stepNumber)}`);
+                if (stepElement) {
+                    stepElement.classList.remove('hidden');
+                    stepElement.style.visibility = 'visible';
+                    setTimeout(() => {
+                        stepElement.classList.add('active');
+                    }, 50);
+                }
+                
+                this.state.currentStep = stepNumber;
+                this.updateProgress();
+                this.updateButtonStates();
+                
+                // Record step time
+                this.recordStepTime(stepNumber);
+            }
+            
+            getStepName(stepNumber) {
+                switch(stepNumber) {
+                    case 1: return 'mMRC';
+                    case 2: return 'CAT';
+                    case 3: return 'GesEPOC';
+                    case 4: return 'Results';
+                    default: return 'mMRC';
+                }
+            }
+            
+            recordStepTime(stepNumber) {
+                this.state.stepTimes[stepNumber] = Date.now();
+            }
+            
+            updateProgress() {
+                // Update step circles
+                for (let i = 1; i <= 4; i++) {
+                    const circle = document.getElementById(`step-${i}`);
+                    const label = circle?.parentElement.querySelector('.step-label');
+                    
+                    if (circle) {
+                        circle.classList.remove('active', 'completed');
+                        if (i < this.state.currentStep) {
+                            circle.classList.add('completed');
+                        } else if (i === this.state.currentStep) {
+                            circle.classList.add('active');
+                        }
+                    }
+                    
+                    if (label) {
+                        label.classList.remove('active');
+                        if (i === this.state.currentStep) {
+                            label.classList.add('active');
+                        }
+                    }
+                }
+                
+                // Update progress text
+                const stepNames = ['mMRC Dyspnea Scale', 'CAT Test', 'Clinical Control', 'Results'];
+                document.getElementById('progress-text').textContent = 
+                    `Step ${this.state.currentStep} of 4: ${stepNames[this.state.currentStep - 1]}`;
+            }
+            
+            // ===== VALIDATION =====
+            validateStep(stepNumber) {
+                switch(stepNumber) {
+                    case 1:
+                        return this.state.mmrcGrade !== null;
+                    case 2:
+                        return ClinicalDatabase.CAT.questions.every(q => 
+                            this.state.catAnswers[q.id] !== undefined
+                        );
+                    case 3:
+                        return ClinicalDatabase.GesEPOC.questions.every(q => 
+                            this.state.gesepocAnswers[q.id] !== undefined
+                        );
+                    default:
+                        return true;
+                }
+            }
+            
+            updateButtonStates() {
+                const canProceed = this.validateStep(this.state.currentStep);
+                
+                // Update next buttons
+                const nextButtons = document.querySelectorAll('.btn-primary[id^="btn-next"]');
+                nextButtons.forEach(btn => {
+                    if (btn.closest('.assessment-step.active')) {
+                        btn.disabled = !canProceed;
+                    }
+                });
+            }
+            
+            // ===== RESULTS CALCULATION =====
+            calculateResults() {
+                // Calculate CAT score
+                const catScore = ClinicalDatabase.CAT.calculateScore(this.state.catAnswers);
+                const catInterpretation = ClinicalDatabase.CAT.getInterpretation(catScore);
+                
+                // Calculate GesEPOC control
+                const gesepocControl = ClinicalDatabase.GesEPOC.calculateControl(
+                    this.state.gesepocAnswers,
+                    this.state.mmrcGrade,
+                    catScore
+                );
+                
+                // Get mMRC interpretation
+                const mmrcInterpretation = ClinicalDatabase.mMRC.getInterpretation(this.state.mmrcGrade);
+                
+                // Get clinical recommendations
+                const recommendations = ClinicalDatabase.Recommendations.getByScores(
+                    this.state.mmrcGrade,
+                    catScore,
+                    gesepocControl
+                );
+                
+                this.state.results = {
+                    mmrc: {
+                        grade: this.state.mmrcGrade,
+                        interpretation: mmrcInterpretation
+                    },
+                    cat: {
+                        score: catScore,
+                        interpretation: catInterpretation
+                    },
+                    gesepoc: gesepocControl,
+                    recommendations: recommendations,
+                    timestamp: new Date().toISOString(),
+                    assessmentTime: Math.floor((Date.now() - this.state.startTime) / 1000)
+                };
+                
+                return this.state.results;
+            }
+            
+            displayResults() {
+                const results = this.calculateResults();
+                
+                // Update mMRC result
+                document.getElementById('mmrc-value').textContent = `Grade ${results.mmrc.grade}`;
+                document.getElementById('mmrc-interpretation').innerHTML = `
+                    <i class="fas ${results.mmrc.interpretation.icon}"></i> 
+                    ${results.mmrc.interpretation.level} dyspnea
+                `;
+                const mmrcCard = document.getElementById('result-mMRC');
+                mmrcCard.className = `result-card ${results.mmrc.interpretation.color}`;
+                
+                // Update CAT result
+                document.getElementById('cat-value').textContent = results.cat.score;
+                document.getElementById('cat-interpretation').innerHTML = `
+                    <i class="fas ${results.cat.interpretation.icon}"></i> 
+                    ${results.cat.interpretation.level} (${results.cat.score}/40)
+                `;
+                const catCard = document.getElementById('result-CAT');
+                catCard.className = `result-card ${results.cat.interpretation.color}`;
+                
+                // Update GesEPOC result
+                document.getElementById('gesepoc-value').textContent = results.gesepoc.status;
+                document.getElementById('gesepoc-interpretation').innerHTML = `
+                    <i class="fas ${results.gesepoc.icon}"></i> 
+                    Class ${results.gesepoc.classification}: ${results.gesepoc.description}
+                `;
+                const gesepocCard = document.getElementById('result-GesEPOC');
+                gesepocCard.className = `result-card ${results.gesepoc.color}`;
+                
+                // Update clinical insights
+                this.renderClinicalInsights(results.recommendations);
+                
+                // Generate QR code
+                this.generateQRCode(results);
+                
+                // Update data display
+                this.updateDataDisplay(results);
+            }
+            
+            renderClinicalInsights(recommendations) {
+                const container = document.getElementById('clinical-insights');
+                container.innerHTML = '';
+                
+                recommendations.forEach((rec, index) => {
+                    const insightDiv = document.createElement('div');
+                    insightDiv.className = 'insight-item fade-in';
+                    insightDiv.style.animationDelay = `${index * 0.1}s`;
+                    
+                    insightDiv.innerHTML = `
+                        <div class="insight-icon">
+                            <i class="fas ${rec.icon}"></i>
+                        </div>
+                        <div class="insight-content">
+                            <h4>${rec.title}</h4>
+                            <p>${rec.content}</p>
+                        </div>
+                    `;
+                    
+                    container.appendChild(insightDiv);
+                });
+            }
+            
+            // ===== QR CODE GENERATION =====
+            generateQRCode(results) {
+                const container = document.getElementById('qrcode-canvas');
+                const fallback = document.getElementById('qrcode-fallback');
+                container.innerHTML = '';
+                fallback.innerHTML = '';
+                
+                // Create data object
+                const qrData = {
+                    type: 'COPD Assessment',
+                    date: new Date().toLocaleDateString(),
+                    time: new Date().toLocaleTimeString(),
+                    scores: {
+                        mMRC: results.mmrc.grade,
+                        CAT: results.cat.score,
+                        GesEPOC: results.gesepoc.classification
+                    },
+                    interpretation: {
+                        mMRC: results.mmrc.interpretation.level,
+                        CAT: results.cat.interpretation.level,
+                        GesEPOC: results.gesepoc.status
+                    }
+                };
+                
+                const qrDataString = JSON.stringify(qrData, null, 2);
+                fallback.textContent = qrDataString;
+                
+                try {
+                    if (typeof QRCode === 'undefined') {
+                        throw new Error('QRCode library not loaded');
+                    }
+                    
+                    QRCode.toCanvas(container, qrDataString, {
+                        width: 200,
+                        height: 200,
+                        margin: 2,
+                        color: {
+                            dark: '#0f172a',
+                            light: '#ffffff'
+                        },
+                        errorCorrectionLevel: 'H'
+                    });
+                } catch (error) {
+                    console.warn('QR Code generation failed, showing text fallback:', error);
+                    container.innerHTML = `
+                        <div style="background: white; padding: 20px; border-radius: 10px; max-width: 200px;">
+                            <div style="font-family: monospace; font-size: 12px; color: #333;">
+                                <strong>Assessment Summary</strong><br>
+                                Date: ${qrData.date}<br>
+                                mMRC: Grade ${qrData.scores.mMRC}<br>
+                                CAT: ${qrData.scores.CAT}/40<br>
+                                GesEPOC: ${qrData.scores.GesEPOC}
+                            </div>
+                        </div>
+                    `;
+                    fallback.classList.remove('hidden');
+                }
+            }
+            
+            // ===== DATA MANAGEMENT =====
+            updateDataDisplay(results) {
+                const dataDisplay = document.getElementById('data-display');
+                const data = {
+                    timestamp: results.timestamp,
+                    assessmentDuration: `${results.assessmentTime} seconds`,
+                    scores: {
+                        mMRC: results.mmrc.grade,
+                        CAT: results.cat.score,
+                        GesEPOC: results.gesepoc.classification
+                    },
+                    interpretations: {
+                        mMRC: results.mmrc.interpretation.level,
+                        CAT: results.cat.interpretation.level,
+                        GesEPOC: results.gesepoc.status
+                    },
+                    rawData: {
+                        mMRC: this.state.mmrcGrade,
+                        CAT: this.state.catAnswers,
+                        GesEPOC: this.state.gesepocAnswers
+                    }
+                };
+                
+                dataDisplay.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            
+            // ===== SCREENSHOT FUNCTIONALITY =====
+            captureScreenshot() {
+                const resultsCard = document.querySelector('#step-Results .card');
+                
+                html2canvas(resultsCard, {
+                    backgroundColor: '#1e293b',
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    allowTaint: true,
+                    foreignObjectRendering: true
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                    link.download = `COPD-Assessment-${timestamp}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    // Show success message
+                    this.showToast('Screenshot saved successfully!', 'success');
+                }).catch(error => {
+                    console.error('Screenshot failed:', error);
+                    this.showToast('Screenshot failed. Please try again.', 'error');
+                });
+            }
+            
+            // ===== PRINT FUNCTIONALITY =====
+            printResults() {
+                const printContent = this.generatePrintableHTML();
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(printContent);
+                printWindow.document.close();
+                printWindow.focus();
+                
+                setTimeout(() => {
+                    printWindow.print();
+                    setTimeout(() => printWindow.close(), 100);
+                }, 250);
+            }
+            
+            generatePrintableHTML() {
+                const results = this.state.results;
+                return `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>COPD Assessment Results</title>
+                        <meta charset="UTF-8">
+                        <style>
+                            @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+                            
+                            body {
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+                                padding: 30px;
+                                color: #333;
+                                line-height: 1.6;
+                            }
+                            
+                            .header {
+                                text-align: center;
+                                margin-bottom: 40px;
+                                padding-bottom: 20px;
+                                border-bottom: 3px solid #0ea5e9;
+                            }
+                            
+                            .header h1 {
+                                color: #0ea5e9;
+                                margin-bottom: 10px;
+                            }
+                            
+                            .header .date {
+                                color: #666;
+                                font-size: 14px;
+                            }
+                            
+                            .scores {
+                                display: grid;
+                                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                                gap: 20px;
+                                margin: 30px 0;
+                            }
+                            
+                            .score-card {
+                                border: 2px solid #ddd;
+                                border-radius: 15px;
+                                padding: 25px;
+                                text-align: center;
+                                position: relative;
+                            }
+                            
+                            .score-card.mmrc { border-top: 6px solid #10b981; }
+                            .score-card.cat { border-top: 6px solid #f59e0b; }
+                            .score-card.gesepoc { border-top: 6px solid #0ea5e9; }
+                            
+                            .score-label {
+                                font-size: 12px;
+                                text-transform: uppercase;
+                                letter-spacing: 1px;
+                                color: #666;
+                                margin-bottom: 10px;
+                            }
+                            
+                            .score-value {
+                                font-size: 36px;
+                                font-weight: 800;
+                                margin: 15px 0;
+                                color: #222;
+                            }
+                            
+                            .score-interpretation {
+                                color: #555;
+                                font-size: 14px;
+                            }
+                            
+                            .recommendations {
+                                margin: 40px 0;
+                                padding: 25px;
+                                background: #f8f9fa;
+                                border-radius: 15px;
+                                border-left: 6px solid #0ea5e9;
+                            }
+                            
+                            .recommendations h3 {
+                                color: #0ea5e9;
+                                margin-bottom: 20px;
+                            }
+                            
+                            .recommendation-item {
+                                margin-bottom: 15px;
+                                padding-left: 20px;
+                                position: relative;
+                            }
+                            
+                            .recommendation-item:before {
+                                content: "•";
+                                color: #0ea5e9;
+                                font-size: 24px;
+                                position: absolute;
+                                left: 0;
+                                top: -5px;
+                            }
+                            
+                            .footer {
+                                margin-top: 50px;
+                                padding-top: 20px;
+                                border-top: 1px solid #ddd;
+                                font-size: 12px;
+                                color: #666;
+                                text-align: center;
+                            }
+                            
+                            @media print {
+                                body {
+                                    padding: 20px;
+                                }
+                                .score-card {
+                                    break-inside: avoid;
+                                }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h1><i class="fas fa-lungs"></i> COPD Assessment Results</h1>
+                            <p class="date">Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+                        </div>
+                        
+                        <div class="scores">
+                            <div class="score-card mmrc">
+                                <div class="score-label">mMRC Dyspnea Scale</div>
+                                <div class="score-value">Grade ${results.mmrc.grade}</div>
+                                <div class="score-interpretation">
+                                    <i class="fas ${results.mmrc.interpretation.icon}"></i>
+                                    ${results.mmrc.interpretation.level} dyspnea
+                                </div>
+                            </div>
+                            
+                            <div class="score-card cat">
+                                <div class="score-label">CAT Score</div>
+                                <div class="score-value">${results.cat.score}/40</div>
+                                <div class="score-interpretation">
+                                    <i class="fas ${results.cat.interpretation.icon}"></i>
+                                    ${results.cat.interpretation.level} impact
+                                </div>
+                            </div>
+                            
+                            <div class="score-card gesepoc">
+                                <div class="score-label">GesEPOC Control</div>
+                                <div class="score-value">${results.gesepoc.status}</div>
+                                <div class="score-interpretation">
+                                    <i class="fas ${results.gesepoc.icon}"></i>
+                                    Class ${results.gesepoc.classification}: ${results.gesepoc.description}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="recommendations">
+                            <h3><i class="fas fa-lightbulb"></i> Clinical Insights & Recommendations</h3>
+                            ${results.recommendations.map(rec => `
+                                <div class="recommendation-item">
+                                    <strong>${rec.title}:</strong> ${rec.content}
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="footer">
+                            <p>This assessment was generated using the COPD Comprehensive Assessment System.</p>
+                            <p>Assessment time: ${results.assessmentTime} seconds | Total questions: ${8 + ClinicalDatabase.GesEPOC.questions.length + 1}</p>
+                            <p><em>Note: This is an assessment tool and not a clinical diagnosis. Please consult with a healthcare professional for medical advice.</em></p>
+                        </div>
+                    </body>
+                    </html>
+                `;
+            }
+            
+            // ===== UTILITY FUNCTIONS =====
+            showToast(message, type = 'info') {
+                // Remove existing toast
+                const existingToast = document.getElementById('toast-notification');
+                if (existingToast) existingToast.remove();
+                
+                // Create new toast
+                const toast = document.createElement('div');
+                toast.id = 'toast-notification';
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: ${type === 'success' ? 'var(--clinical-good)' : type === 'error' ? 'var(--clinical-poor)' : 'var(--primary-blue)'};
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: var(--border-radius-sm);
+                    box-shadow: var(--shadow-lg);
+                    z-index: 9999;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    animation: fadeInUp 0.3s ease-out;
+                `;
+                
+                toast.innerHTML = `
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                `;
+                
+                document.body.appendChild(toast);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    toast.style.animation = 'fadeOutDown 0.3s ease-out forwards';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+            
+            // ===== EVENT LISTENERS =====
+            setupEventListeners() {
+                // Navigation buttons
+                document.getElementById('btn-next-mMRC').addEventListener('click', () => {
+                    if (this.validateStep(1)) {
+                        this.navigateToStep(2);
+                    }
+                });
+                
+                document.getElementById('btn-prev-CAT').addEventListener('click', () => {
+                    this.navigateToStep(1);
+                });
+                
+                document.getElementById('btn-next-CAT').addEventListener('click', () => {
+                    if (this.validateStep(2)) {
+                        this.navigateToStep(3);
+                    } else {
+                        this.showToast('Please answer all CAT questions before proceeding.', 'error');
+                    }
+                });
+                
+                document.getElementById('btn-prev-GesEPOC').addEventListener('click', () => {
+                    this.navigateToStep(2);
+                });
+                
+                document.getElementById('btn-next-GesEPOC').addEventListener('click', () => {
+                    if (this.validateStep(3)) {
+                        this.navigateToStep(4);
+                        this.displayResults();
+                    } else {
+                        this.showToast('Please answer all clinical assessment questions before proceeding.', 'error');
+                    }
+                });
+                
+                // Action buttons
+                document.getElementById('btn-restart').addEventListener('click', () => {
+                    if (confirm('Start a new assessment? Current assessment data will be lost.')) {
+                        this.state = {
+                            currentStep: 1,
+                            mmrcGrade: null,
+                            catAnswers: {},
+                            gesepocAnswers: {},
+                            results: null,
+                            startTime: Date.now(),
+                            stepTimes: {},
+                            validationErrors: []
+                        };
+                        clearInterval(this.timerInterval);
+                        this.initialize();
+                        this.navigateToStep(1);
+                    }
+                });
+                
+                document.getElementById('btn-print').addEventListener('click', () => {
+                    this.printResults();
+                });
+                
+                document.getElementById('btn-email').addEventListener('click', () => {
+                    const results = this.state.results;
+                    const subject = encodeURIComponent('COPD Assessment Results');
+                    const body = encodeURIComponent(this.generateEmailBody(results));
+                    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+                });
+                
+                document.getElementById('btn-download-screenshot').addEventListener('click', () => {
+                    this.captureScreenshot();
+                });
+                
+                document.getElementById('btn-copy-summary').addEventListener('click', async () => {
+                    const summary = this.generateTextSummary();
+                    try {
+                        await navigator.clipboard.writeText(summary);
+                        this.showToast('Summary copied to clipboard!', 'success');
+                    } catch (err) {
+                        this.showToast('Failed to copy summary', 'error');
+                    }
+                });
+                
+                document.getElementById('btn-generate-pdf').addEventListener('click', () => {
+                    this.showToast('PDF generation coming soon!', 'info');
+                });
+                
+                document.getElementById('btn-toggle-data').addEventListener('click', () => {
+                    const dataDisplay = document.getElementById('data-display');
+                    const button = document.getElementById('btn-toggle-data');
+                    
+                    if (dataDisplay.classList.contains('hidden')) {
+                        dataDisplay.classList.remove('hidden');
+                        button.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Raw Data';
+                    } else {
+                        dataDisplay.classList.add('hidden');
+                        button.innerHTML = '<i class="fas fa-eye"></i> View Raw Data';
+                    }
+                });
+            }
+            
+            setupQuickNavigation() {
+                document.getElementById('nav-prev').addEventListener('click', () => {
+                    if (this.state.currentStep > 1) {
+                        this.navigateToStep(this.state.currentStep - 1);
+                    }
+                });
+                
+                document.getElementById('nav-next').addEventListener('click', () => {
+                    if (this.state.currentStep < 4) {
+                        this.navigateToStep(this.state.currentStep + 1);
+                    }
+                });
+                
+                document.getElementById('nav-results').addEventListener('click', () => {
+                    if (this.validateStep(3)) {
+                        this.navigateToStep(4);
+                        this.displayResults();
+                    } else {
+                        this.showToast('Please complete all assessments first', 'error');
+                    }
+                });
+            }
+            
+            setupOfflineDetection() {
+                const banner = document.getElementById('offline-banner');
+                
+                window.addEventListener('online', () => {
+                    banner.style.display = 'none';
+                });
+                
+                window.addEventListener('offline', () => {
+                    banner.style.display = 'block';
+                });
+                
+                if (!navigator.onLine) {
+                    banner.style.display = 'block';
+                }
+            }
+            
+            // ===== TEXT GENERATION =====
+            generateTextSummary() {
+                const results = this.state.results;
+                return `
+COPD COMPREHENSIVE ASSESSMENT RESULTS
+=====================================
+Date: ${new Date().toLocaleDateString()}
+Time: ${new Date().toLocaleTimeString()}
+
+SCORES:
+• mMRC Dyspnea Scale: Grade ${results.mmrc.grade} (${results.mmrc.interpretation.level})
+• CAT Score: ${results.cat.score}/40 (${results.cat.interpretation.level})
+• GesEPOC Control: ${results.gesepoc.status} (Class ${results.gesepoc.classification})
+
+INTERPRETATION:
+${results.gesepoc.description}
+
+CLINICAL INSIGHTS:
+${results.recommendations.map(rec => `• ${rec.title}: ${rec.content}`).join('\n')}
+
+Assessment completed in ${results.assessmentTime} seconds.
+
+Note: This assessment is a tool to aid clinical evaluation and is not a diagnosis.
+`;
+            }
+            
+            generateEmailBody(results) {
+                return this.generateTextSummary();
+            }
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize application
+            window.copdApp = new EnhancedCOPDAssessment();
+            
+            // Add CSS animations for toast
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translate(-50%, 20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translate(-50%, 0);
+                    }
+                }
+                
+                @keyframes fadeOutDown {
+                    from {
+                        opacity: 1;
+                        transform: translate(-50%, 0);
+                    }
+                    to {
+                        opacity: 0;
+                        transform: translate(-50%, 20px);
+                    }
+                }
+                
+                /* PWA installation prompt */
+                .pwa-install {
+                    position: fixed;
+                    bottom: 100px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: var(--gradient-primary);
+                    color: white;
+                    padding: 16px 24px;
+                    border-radius: var(--border-radius);
+                    box-shadow: var(--shadow-xl);
+                    z-index: 9998;
+                    display: none;
+                    animation: fadeInUp 0.3s ease-out;
+                }
+                
+                .pwa-install.show {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Check for PWA installation
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                const installPrompt = document.createElement('div');
+                installPrompt.className = 'pwa-install';
+                installPrompt.innerHTML = `
+                    <i class="fas fa-download"></i>
+                    <div>
+                        <div style="font-weight: 600;">Install COPD Assessment</div>
+                        <div style="font-size: 0.875rem;">Install for offline use</div>
+                    </div>
+                    <button style="
+                        background: white;
+                        color: var(--primary-blue);
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: var(--border-radius-xs);
+                        font-weight: 600;
+                        cursor: pointer;
+                        margin-left: 12px;
+                    ">Install</button>
+                `;
+                
+                document.body.appendChild(installPrompt);
+                
+                setTimeout(() => installPrompt.classList.add('show'), 5000);
+                
+                installPrompt.querySelector('button').addEventListener('click', () => {
+                    e.prompt();
+                    installPrompt.classList.remove('show');
+                    setTimeout(() => installPrompt.remove(), 300);
+                });
+                
+                // Hide after 30 seconds
+                setTimeout(() => {
+                    installPrompt.classList.remove('show');
+                    setTimeout(() => installPrompt.remove(), 300);
+                }, 30000);
+            });
+        });
+    </script>
+</body>
+</html>
